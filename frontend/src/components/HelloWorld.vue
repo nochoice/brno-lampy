@@ -1,40 +1,80 @@
 <template>
-  <div class="hello">
-    <h1>{{ msg }}</h1>
-    <p>
-      For a guide and recipes on how to configure / customize this project,<br>
-      check out the
-      <a href="https://cli.vuejs.org" target="_blank" rel="noopener">vue-cli documentation</a>.
-    </p>
-    <h3>Installed CLI Plugins</h3>
-    <ul>
-      <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-babel" target="_blank" rel="noopener">babel</a></li>
-      <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-eslint" target="_blank" rel="noopener">eslint</a></li>
-    </ul>
-    <h3>Essential Links</h3>
-    <ul>
-      <li><a href="https://vuejs.org" target="_blank" rel="noopener">Core Docs</a></li>
-      <li><a href="https://forum.vuejs.org" target="_blank" rel="noopener">Forum</a></li>
-      <li><a href="https://chat.vuejs.org" target="_blank" rel="noopener">Community Chat</a></li>
-      <li><a href="https://twitter.com/vuejs" target="_blank" rel="noopener">Twitter</a></li>
-      <li><a href="https://news.vuejs.org" target="_blank" rel="noopener">News</a></li>
-    </ul>
-    <h3>Ecosystem</h3>
-    <ul>
-      <li><a href="https://router.vuejs.org" target="_blank" rel="noopener">vue-router</a></li>
-      <li><a href="https://vuex.vuejs.org" target="_blank" rel="noopener">vuex</a></li>
-      <li><a href="https://github.com/vuejs/vue-devtools#vue-devtools" target="_blank" rel="noopener">vue-devtools</a></li>
-      <li><a href="https://vue-loader.vuejs.org" target="_blank" rel="noopener">vue-loader</a></li>
-      <li><a href="https://github.com/vuejs/awesome-vue" target="_blank" rel="noopener">awesome-vue</a></li>
-    </ul>
-  </div>
+     <div id="mapid" style="height: 100%;"></div>
 </template>
 
 <script>
+
+import leaflet from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+
 export default {
   name: 'HelloWorld',
   props: {
     msg: String
+  },
+
+  methods: {
+    async showPopup(id, event) {
+      const data = await this.loadDetail(id);
+      const date = new Date(data.properties['datum_instalace']);
+      const instalationDate =  ((date.getDate() > 9) ? date.getDate() : ('0' + date.getDate())) + '. ' + ((date.getMonth() > 8) ? (date.getMonth() + 1) : ('0' + (date.getMonth() + 1))) + '. ' + date.getFullYear()
+      event.target.bindPopup(`
+        <h1>${data.properties['evidenční_číslo']}</h1>
+        <table>
+          <tr><th>Ulice</th><td>${data.properties['název_ulice']}</td></tr>
+          <tr><th>Katastr</th><td>${data.properties['katastr']}</td></tr>
+          <tr><th>Počet svítidel</th><td>${data.properties['počet_svítidel']}</td></tr>
+          <tr><th>Typ svetelneho místa</th><td>${data.properties['typ_sv__místa']}</td></tr>
+          <tr><th>Datum instalace</th><td>${instalationDate}</td></tr>
+        </table>
+      `)
+    },
+
+    async loadDetail(id) {
+      const set = Math.floor(id/300) * 300;
+      const position = id - set;
+      return await fetch(`/data/points-details/${set}.json`)
+                          .then(resp => resp.json())
+                          .then(data => data[position])
+    }
+  },
+
+  mounted() {
+    const L = leaflet;
+    var mymap = L.map('mapid', {preferCanvas: true}).setView([49.1951, 16.6068], 15);
+
+    L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png', {
+      maxZoom: 20,
+      attribution: '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a>, &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors'
+    }).addTo(mymap);
+
+    
+  
+    fetch('/data/points.json')
+        .then( resp => resp.json())
+        .then( json => { 
+
+          const group = L.featureGroup();
+
+          Object.keys(json).forEach((key) => {
+            // if (index > 2) return;
+
+              const latLang = [json[key][1], json[key][0]];
+
+              var circle = L.circle(latLang, {
+                stroke: false,
+                fillColor: 'white',
+                fillOpacity: 0.6,
+                radius: 3
+              });
+
+              circle.addTo(group);
+
+              circle.on('click', (event) => this.showPopup(key, event))
+            });
+
+            group.addTo(mymap);
+         });
   }
 }
 </script>
