@@ -5,13 +5,15 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "generate": "npm run generate:points && npm run generate:streets && npm run generate:streets-points",
     "generate:points": "node scripts/points.js",
     "generate:streets": "node scripts/streets.js",
     "generate:streets-points": "node scripts/streets-points.js",
     "copy": "copyfiles ./data/** ./frontend/public"
   },
   "dependencies": {
-    "copyfiles": "^2.4.1"
+    "copyfiles": "^2.4.1",
+    "fs-extra": "^10.0.0"
   },
   "author": "",
   "license": "ISC"

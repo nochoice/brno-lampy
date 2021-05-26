@@ -1,4 +1,4 @@
-const fs = require('fs');
+const fs = require('fs-extra');
 const data = require('../sloupy.json');
 const streets = data.features.reduce((acc, item) => {
     const street = item.properties['název_ulice'].toLowerCase().replace(/ /g, '_');
@@ -9,7 +9,7 @@ const streets = data.features.reduce((acc, item) => {
 }, {});
 
 Object.keys(streets).forEach(key => {
-    fs.writeFileSync('./data/streets/'+ key + '.json', JSON.stringify(streets[key], null, ''), 'utf8');
+    fs.outputFileSync('./data/streets/'+ key + '.json', JSON.stringify(streets[key], null, ''), 'utf8');
 })
 
 // fs.writeFileSync('./data/streets.json', JSON.stringify(out, null, ''), 'utf8');
