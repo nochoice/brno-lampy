@@ -5,7 +5,10 @@
 <script>
 
 import leaflet from 'leaflet';
+import { getPointDetail } from '../services/api';
 import 'leaflet/dist/leaflet.css';
+
+const L = leaflet;
 
 export default {
   name: 'HelloWorld',
@@ -15,7 +18,8 @@ export default {
 
   methods: {
     async showPopup(id, event) {
-      const data = await this.loadDetail(id);
+      event.target.getPopup().setContent('aaaa');
+      const data = await getPointDetail(id);
       const date = new Date(data.properties['datum_instalace']);
       const instalationDate =  ((date.getDate() > 9) ? date.getDate() : ('0' + date.getDate())) + '. ' + ((date.getMonth() > 8) ? (date.getMonth() + 1) : ('0' + (date.getMonth() + 1))) + '. ' + date.getFullYear()
       
@@ -33,60 +37,56 @@ export default {
       event.target.getPopup().setContent(content);
     },
 
-    
+    addMap() {
+      this.map = L.map('mapid', {preferCanvas: true}).setView([49.1951, 16.6068], 19);
 
-    async loadDetail(id) {
-      const set = Math.floor(id/300) * 300;
-      const position = id - set;
-      return await fetch(`/data/points/by-index/details/${set}.json`)
-                          .then(resp => resp.json())
-                          .then(data => data[position])
+      L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png', {
+        maxZoom: 20,
+        attribution: '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a>, &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors'
+      }).addTo(this.map);
+    },
+
+    renderPoints(json) {
+      const group = L.featureGroup();
+
+      Object.keys(json).forEach((position) => {
+          const latLang = [json[position][1], json[position][0]];
+
+          var circle = L.circle(latLang, {
+            stroke: false,
+            fillColor: 'white',
+            fillOpacity: 0.6,
+            radius: 3
+          });
+
+          circle.addTo(group);
+          circle.bindPopup();
+
+          circle.on('click', (event) => this.showPopup(position, event))
+        });
+
+        group.addTo(this.map);
     }
   },
 
-
   mounted() {
-    const L = leaflet;
-    var mymap = L.map('mapid', {preferCanvas: true}).setView([49.1951, 16.6068], 15);
+    this.addMap();
 
-    L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png', {
-      maxZoom: 20,
-      attribution: '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a>, &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors'
-    }).addTo(mymap);
+    this.$store.dispatch('loadPoints');
+  },
 
-    
-  
-    fetch('/data/points/by-index/points.json')
-        .then( resp => resp.json())
-        .then( json => { 
+  computed: {
+    points() {
+      return this.$store.state.main.points
+    }
+  },
 
-          const group = L.featureGroup();
-
-          Object.keys(json).forEach((position) => {
-            // if (index > 2) return;
-
-              const latLang = [json[position][1], json[position][0]];
-
-              var circle = L.circle(latLang, {
-                stroke: false,
-                fillColor: 'white',
-                fillOpacity: 0.6,
-                radius: 3
-              });
-
-              circle.addTo(group);
-              circle.bindPopup();
-
-              circle.on('click', (event) => this.showPopup(position, event))
-            });
-
-            group.addTo(mymap);
-         });
+  watch: {
+    points(current) { this.renderPoints(current) }
   }
 }
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 h3 {
   margin: 40px 0 0;
