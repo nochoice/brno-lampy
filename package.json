@@ -5,9 +5,10 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "generate": "npm run generate:points && npm run generate:points-details && npm run generate:streets && npm run generate:streets-points",
-    "generate:points": "node scripts/points.js",
-    "generate:points-details": "node scripts/points-details.js",
+    "generate": "npm run generate:points-by-index && npm run generate:points-by-index-details && npm run generate:streets && npm run generate:streets-points",
+    "generate:points-by-index": "node scripts/points-by-index.js",
+    "generate:points-by-index-details": "node scripts/points-by-index-details.js",
+    "generate:points-index-to-id": "node scripts/points-index-to-id.js",
     "generate:streets": "node scripts/streets.js",
     "generate:streets-points": "node scripts/streets-points.js",
     "copy": "copyfiles ./data/** ./frontend/public"

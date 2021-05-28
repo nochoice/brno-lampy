@@ -18,7 +18,8 @@ export default {
       const data = await this.loadDetail(id);
       const date = new Date(data.properties['datum_instalace']);
       const instalationDate =  ((date.getDate() > 9) ? date.getDate() : ('0' + date.getDate())) + '. ' + ((date.getMonth() > 8) ? (date.getMonth() + 1) : ('0' + (date.getMonth() + 1))) + '. ' + date.getFullYear()
-      event.target.bindPopup(`
+      
+      const content = `
         <h1>${data.properties['evidenční_číslo']}</h1>
         <table>
           <tr><th>Ulice</th><td>${data.properties['název_ulice']}</td></tr>
@@ -27,17 +28,22 @@ export default {
           <tr><th>Typ svetelneho místa</th><td>${data.properties['typ_sv__místa']}</td></tr>
           <tr><th>Datum instalace</th><td>${instalationDate}</td></tr>
         </table>
-      `)
+      `;
+
+      event.target.getPopup().setContent(content);
     },
+
+    
 
     async loadDetail(id) {
       const set = Math.floor(id/300) * 300;
       const position = id - set;
-      return await fetch(`/data/points-details/${set}.json`)
+      return await fetch(`/data/points/by-index/details/${set}.json`)
                           .then(resp => resp.json())
                           .then(data => data[position])
     }
   },
+
 
   mounted() {
     const L = leaflet;
@@ -50,16 +56,16 @@ export default {
 
     
   
-    fetch('/data/points.json')
+    fetch('/data/points/by-index/points.json')
         .then( resp => resp.json())
         .then( json => { 
 
           const group = L.featureGroup();
 
-          Object.keys(json).forEach((key) => {
+          Object.keys(json).forEach((position) => {
             // if (index > 2) return;
 
-              const latLang = [json[key][1], json[key][0]];
+              const latLang = [json[position][1], json[position][0]];
 
               var circle = L.circle(latLang, {
                 stroke: false,
@@ -69,8 +75,9 @@ export default {
               });
 
               circle.addTo(group);
+              circle.bindPopup();
 
-              circle.on('click', (event) => this.showPopup(key, event))
+              circle.on('click', (event) => this.showPopup(position, event))
             });
 
             group.addTo(mymap);
