@@ -1,40 +1,32 @@
 <template>
-     <div id="mapid" style="height: 100%;"></div>
+  <div style="height: 100%;">
+      <div id="mapid" style="height: 100%;"></div>
+
+      <Detail class="detail" v-if="isDetail" />
+  </div>
 </template>
 
 <script>
 
 import leaflet from 'leaflet';
-import { getPointDetail } from '../services/api';
 import 'leaflet/dist/leaflet.css';
+import Detail from './Detail';
 
 const L = leaflet;
 
 export default {
-  name: 'HelloWorld',
+  name: 'Map',
+  components: {
+    Detail
+  },
   props: {
     msg: String
   },
 
   methods: {
-    async showPopup(id, event) {
-      event.target.getPopup().setContent('aaaa');
-      const data = await getPointDetail(id);
-      const date = new Date(data.properties['datum_instalace']);
-      const instalationDate =  ((date.getDate() > 9) ? date.getDate() : ('0' + date.getDate())) + '. ' + ((date.getMonth() > 8) ? (date.getMonth() + 1) : ('0' + (date.getMonth() + 1))) + '. ' + date.getFullYear()
-      
-      const content = `
-        <h1>${data.properties['evidenční_číslo']}</h1>
-        <table>
-          <tr><th>Ulice</th><td>${data.properties['název_ulice']}</td></tr>
-          <tr><th>Katastr</th><td>${data.properties['katastr']}</td></tr>
-          <tr><th>Počet svítidel</th><td>${data.properties['počet_svítidel']}</td></tr>
-          <tr><th>Typ svetelneho místa</th><td>${data.properties['typ_sv__místa']}</td></tr>
-          <tr><th>Datum instalace</th><td>${instalationDate}</td></tr>
-        </table>
-      `;
-
-      event.target.getPopup().setContent(content);
+    async showPopup(id) {
+      this.$store.dispatch('showDetail');
+      this.$store.dispatch('loadPointDetail', id);
     },
 
     addMap() {
@@ -60,7 +52,7 @@ export default {
           });
 
           circle.addTo(group);
-          circle.bindPopup();
+          // circle.bindPopup();
 
           circle.on('click', (event) => this.showPopup(position, event))
         });
@@ -78,6 +70,9 @@ export default {
   computed: {
     points() {
       return this.$store.state.main.points
+    },
+    isDetail() {
+      return this.$store.state.main.isDetail
     }
   },
 
@@ -88,18 +83,16 @@ export default {
 </script>
 
 <style scoped>
-h3 {
-  margin: 40px 0 0;
+
+#mapid {
+  z-index: 10;
 }
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-li {
-  display: inline-block;
-  margin: 0 10px;
-}
-a {
-  color: #42b983;
+.detail {
+  position: absolute;
+  z-index: 20;
+  display: block;
+  width: 30%;
+  top: 20px; right: 20px;
+  border: 6px solid #fff;
 }
 </style>

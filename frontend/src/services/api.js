@@ -1,3 +1,5 @@
+
+
 const loadPoints = async () => await fetch('/data/points/by-index/points.json').then(resp => resp.json());
 
 const getPointDetail = async (id) => {
@@ -8,7 +10,15 @@ const getPointDetail = async (id) => {
                         .then(data => data[position])
 }
 
+const getStreetPoints = async (street) => {
+    const streetConvert = street.toLowerCase().replace(/ /g, '_');
+
+    return await fetch(`/data/streets/${streetConvert}.json`)
+                        .then(resp => resp.json())
+}
+
 module.exports = {
     loadPoints,
-    getPointDetail
+    getPointDetail,
+    getStreetPoints
 }
