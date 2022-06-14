@@ -10,3 +10,4 @@
 
 Application that shows GIS data on the map. In this case the lamps in brno. Application consists of transform scripts, that prepares json files for queries.
 
+It is based on source from open data. After clicking on the map, small detail is displayed.
