@@ -21,7 +21,7 @@
             <tr><th>Katastr</th><td>{{detail.properties['katastr']}}</td></tr>
             <tr><th>Počet svítidel</th><td>{{detail.properties['počet_svítidel']}}</td></tr>
             <tr><th>Typ svetelneho místa</th><td>{{detail.properties['typ_sv__místa']}}</td></tr>
-            <tr><th>Datum instalace</th><td>fdfd</td></tr>
+            <tr><th>Datum instalace</th><td>{{detail.properties['datum_instalace']}}</td></tr>  
           </table>
         </div>
       </v-card-text>
@@ -101,7 +101,8 @@ export default {
       this.renderPoints(streetPoints);
       this.renderPointCurrentPoint(detail);
       this.map.flyToBounds(this.pointLayer.getBounds());
-    }
+    },
+
   },
 
   mounted() {
@@ -112,6 +113,9 @@ export default {
   computed: {
     detail() {
       return this.$store.state.main.detail
+    },
+    instalationdate() {
+      return 'ass';
     }
   },
 

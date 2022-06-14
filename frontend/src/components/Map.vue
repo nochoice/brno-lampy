@@ -82,17 +82,22 @@ export default {
 }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 
-#mapid {
-  z-index: 10;
-}
-.detail {
-  position: absolute;
-  z-index: 20;
-  display: block;
-  width: 30%;
-  top: 20px; right: 20px;
-  border: 6px solid #fff;
-}
+  #mapid {
+    z-index: 10;
+  }
+  .detail {
+    position: absolute;
+    z-index: 20;
+    display: block;
+    width: 30%;
+    top: 20px; right: 20px;
+    border: 6px solid #fff;
+
+    @media (max-width: 800px) {
+        width: 90%;
+        right: 20px;
+    }
+  }
 </style>
