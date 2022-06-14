@@ -1,10 +1,10 @@
 <p align="center">
   <h3 align="center">Lampy Brno</h3>
-
-  <img src="showcase.png" width="300" />
 </p>
 
-
+<p align="center">
+  <img src="showcase.png" width="300" />
+</p>
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
